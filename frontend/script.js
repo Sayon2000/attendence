@@ -7,6 +7,8 @@ document.getElementById('date').addEventListener('submit',checkDate)
 const display = document.getElementById('display')
 const ul = document.querySelector('ul')
 
+const form = document.querySelector("#display form")
+
 document.querySelector("#display form").addEventListener('submit' , uploadAttendence)
 
 let attendence = []
@@ -15,12 +17,16 @@ var date ;
 async function checkDate(e){
     e.preventDefault()
     date = e.target.getdate.value;
+    const table = document.getElementById("attendence-report")
 
+    table.classList.add('hide')
+    form.classList.remove("hide")
     console.log(date)
     try{
         const res = await axiosInstance.post('/getdate' ,{date})
         console.log(res)
         ul.innerHTML = ``
+
         attendence = []
         if(!res.data.success){
 
@@ -128,10 +134,47 @@ function showUsers(user){
   }
 
 
+  document.getElementById("report").addEventListener('click' , async()=>{
+    try{
 
-// <li>fav_language
-//                     <input type="radio" name="fav_language" value="present" required>
-//                     <label for="present">present</label>
-//                     <input type="radio" name="fav_language" value="absent" required>
-//                     <label for="absent">absent</label>
-//                 </li>
+        const res = await axiosInstance('/report')
+        console.log(res)
+        if(res.status == 200){
+            form.classList.add("hide")
+
+            const {totalDays , students} = res.data;
+            console.log(totalDays)
+            console.log(students)
+
+            const table = document.getElementById("attendence-report")
+            table.classList.remove("hide")
+            const tbody = table.querySelector("tbody")
+            tbody.innerHTML =``
+            ul.innerHTML = ``
+            students.forEach(student =>{
+                const tr = document.createElement('tr')
+
+                const td1 = document.createElement('td')
+                const td2 = document.createElement('td')
+                const td3 = document.createElement('td')
+
+
+                td1.textContent = student.name
+                td2.textContent = student.totalPresent
+                const value = ((student.totalPresent / totalDays)  * 100).toFixed(2)
+                td3.textContent = value + "%"
+
+                tr.appendChild(td1)
+                tr.appendChild(td2)
+                tr.appendChild(td3)
+
+                tbody.appendChild(tr)
+            })
+
+        }
+    }catch(e){
+        console.log(e)
+    }
+  })
+
+
